@@ -14,14 +14,15 @@ function App() {
     letterPosition: 0,
   });
   const [wordSet, setWordSet] = useState(new Set());
+  const [disabledLetters, setDisabledLetters] = useState([])
 
-  const correctWord = "RIGHT";
+  const correctWord = "BITCH";
 
   useEffect(() => {
     generateWordSet().then((words) => {
       setWordSet(words.wordSet);
     });
-  });
+  }, []);
 
   const onSelectLetter = (keyValue) => {
     if (currAttempt.letterPosition > 4) return;
@@ -36,7 +37,17 @@ function App() {
 
   const onEnter = () => {
     if (currAttempt.letterPosition !== 5) return;
-    setCurrAttempt({ attempt: currAttempt.attempt + 1, letterPosition: 0 });
+
+    let currWord = "";
+    for (let i = 0; i < 5; i++) {
+      currWord += board[currAttempt.attempt][i];
+    }
+    if (wordSet.has(currWord.toLowerCase())) {
+      setCurrAttempt({ attempt: currAttempt.attempt + 1, letterPosition: 0 });
+    } else {
+      alert("Word Not Found")
+    }
+
   };
 
   const onDelete = () => {
@@ -65,6 +76,8 @@ function App() {
           onEnter,
           onDelete,
           correctWord,
+          disabledLetters,
+          setDisabledLetters
         }}
       >
         <div className="game">

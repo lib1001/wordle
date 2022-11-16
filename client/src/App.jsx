@@ -4,6 +4,7 @@ import Keyboard from "./components/Keyboard";
 import { createContext, useState } from "react";
 import { boardDefault, generateWordSet } from "./Words";
 import { useEffect } from "react";
+import GameOver from "./components/GameOver";
 
 export const AppContext = createContext();
 
@@ -14,13 +15,17 @@ function App() {
     letterPosition: 0,
   });
   const [wordSet, setWordSet] = useState(new Set());
-  const [disabledLetters, setDisabledLetters] = useState([])
-
-  const correctWord = "BITCH";
+  const [disabledLetters, setDisabledLetters] = useState([]);
+  const [gameOver, setGameOver] = useState({
+    gameOver: false,
+    guessedWord: false,
+  });
+  const [correctWord, setCorrectWord] = useState("");
 
   useEffect(() => {
     generateWordSet().then((words) => {
       setWordSet(words.wordSet);
+      setCorrectWord(words.todaysWord)
     });
   }, []);
 
@@ -45,9 +50,15 @@ function App() {
     if (wordSet.has(currWord.toLowerCase())) {
       setCurrAttempt({ attempt: currAttempt.attempt + 1, letterPosition: 0 });
     } else {
-      alert("Word Not Found")
+      alert("Word Not Found");
     }
-
+    if (currWord === correctWord) {
+      setGameOver({gameOver: true, guessedWord: true})
+      return;
+    }
+    if (currAttempt.attempt === 5) {
+      setGameOver({gameOver: true, guessedWord: false})
+    }
   };
 
   const onDelete = () => {
@@ -62,7 +73,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="app">
       <nav>
         <h1>Wordle</h1>
       </nav>
@@ -77,12 +88,14 @@ function App() {
           onDelete,
           correctWord,
           disabledLetters,
-          setDisabledLetters
+          setDisabledLetters,
+          gameOver,
+          setGameOver,
         }}
       >
         <div className="game">
           <Board />
-          <Keyboard />
+          {gameOver.gameOver ? <GameOver /> : <Keyboard />}
         </div>
       </AppContext.Provider>
     </div>
